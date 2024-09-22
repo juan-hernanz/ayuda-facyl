@@ -117,8 +117,10 @@ def show_details():
 
         
         # Open the file and read the token
-        with open('api_token.txt', 'r') as file:
-            api_token = file.read().strip()
+        # with open('api_token.txt', 'r') as file:
+        #     api_token = file.read().strip()
+        # client = InferenceClient(token=api_token)
+        api_token = st.secrets["api_token"]
         client = InferenceClient(token=api_token)
 
         # Calls to genAI

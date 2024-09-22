@@ -1,7 +1,0 @@
-pandas==1.4.4
-plotly==5.22.0
-streamlit==1.38.0
-streamlit-card==1.0.2
-huggingface-hub==0.24.6
-numpy
-requests
