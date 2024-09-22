@@ -1,8 +1,7 @@
-streamlit
-pandas
+pandas==1.4.4
 requests
-plotly
-datetime
+plotly==5.22.0
 numpy
-streamlit_card
-huggingface_hub
+streamlit==1.38.0
+streamlit-card==1.0.2
+huggingface-hub==0.24.6
