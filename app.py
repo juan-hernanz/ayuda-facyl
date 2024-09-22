@@ -1,15 +1,11 @@
 import streamlit as st
 import pandas as pd
-import requests
-import plotly.express as px
 import datetime
-import numpy as np
-from streamlit_card import card
-from pages.listado_ayudas import show_listado_ayudas
  
 import os
 
 from utils import load_data, asignar_situacion, get_unique_materias, filter_materias
+
 
 
 # Datos de mapeo
@@ -56,8 +52,6 @@ def show_home():
         initial_sidebar_state="collapsed",
         layout="wide"
     )
-
-    # st.write(page)
 
     # Título
     st.title("**Ayuda Fá**cyl")
