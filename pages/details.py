@@ -36,6 +36,7 @@ st.markdown("""
 }
 .burbuja {
     background-color: #f0f0f0;
+    color: #333;
     border-radius: 20px;
     padding: 5px 10px;
     margin: 5px;

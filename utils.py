@@ -328,7 +328,6 @@ def section_header(title):
         margin-bottom: 10px;
     }
     .section-header h4 {
-        color: #262730;
         font-weight: bold;
         margin-bottom: 0;
         padding-bottom: 10px;
