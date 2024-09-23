@@ -49,6 +49,7 @@ def show_listado_ayudas():
     <style>
     .status-bubble-active {
         background-color: #e8f5e9;
+        color: #4CAF50;
         border-radius: 20px;
         padding: 5px 10px;
         font-weight: bold;
@@ -61,6 +62,7 @@ def show_listado_ayudas():
     }
     .status-bubble-expired {
         background-color: #f0f0f0;
+        color: gray;
         border-radius: 20px;
         padding: 5px 10px;
         font-weight: bold;

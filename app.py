@@ -96,6 +96,7 @@ def show_home():
     }
     .status-bubble-active {
         background-color: #e8f5e9;
+        color: #4CAF50;
         border-radius: 20px;
         padding: 5px 10px;
         font-weight: bold;
@@ -108,6 +109,7 @@ def show_home():
     }
     .status-bubble-expired {
         background-color: #f0f0f0;
+        color: gray;
         border-radius: 20px;
         padding: 5px 10px;
         font-weight: bold;
@@ -162,6 +164,7 @@ def show_home():
                     border: none;
                     padding: 5px;
                     color: black !important;
+                    background-color: #e8f5e9 !important;
                     text-decoration: none;
                     cursor: pointer;
                     border-radius: 15px;

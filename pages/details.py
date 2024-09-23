@@ -8,6 +8,7 @@ st.markdown("""
 <style>
 .status-bubble-active {
     background-color: #e8f5e9;
+    color: #4CAF50;
     border-radius: 20px;
     padding: 5px 10px;
     margin: 5px;
@@ -21,6 +22,7 @@ st.markdown("""
 }
 .status-bubble-expired {
     background-color: #f0f0f0;
+    color: gray;
     border-radius: 20px;
     padding: 5px 10px;
     margin: 5px;

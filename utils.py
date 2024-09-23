@@ -211,7 +211,6 @@ def mostrar_tarjetas_personalizadas(df_to_show, status):
     .card-title {
         font-size: 14px;
         font-weight: bold;
-        color: #333;
     }
     .stButton > button {
         width: 100%;
@@ -223,11 +222,12 @@ def mostrar_tarjetas_personalizadas(df_to_show, status):
     .burbuja {
         display: inline-block;
         background-color: #f0f0f0;
+        color: #333;
         border-radius: 15px;
         padding: 5px 10px;
         margin-right: 5px;
         margin-bottom: 10px;
-        font-size: 12px;
+        font-size: 12px; 
     }
     .status-bubble-active {
         background-color: #e8f5e9;
