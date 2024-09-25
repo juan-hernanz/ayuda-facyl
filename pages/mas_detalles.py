@@ -112,6 +112,9 @@ def show_details():
         # Fetch the details of the selected beca from your dataframe
         ayuda_details = full_df[full_df['identificador'] == beca_id].iloc[0]
 
+                # 1. Mostrar Título
+        st.subheader(f"{ayuda_details['titulo']}")
+
         # Determine status
         if ayuda_details['days_left']>=0:
             status = 'active'
@@ -123,89 +126,142 @@ def show_details():
             dias_text = 'Expiró hace '
 
         # Check if beca_id has been processed by ai
-        ayuda_ai_df = generando_datos_ayuda(ayuda_details)
-        # Convert ai results from df to dictionary
-        ayuda_ai = ayuda_ai_df.to_dict('records')[0]
-
-        # st.write(ayuda_ai_df)
-
-        # 1. Mostrar Título
-        st.subheader(f"{ayuda_details['titulo']}")
-
-
-        # 2. Crear columnas para detalles debajo del título
-        col_left, col_mid, col_right= st.columns([0.27,0.35,0.38]) 
-
-
-        with col_left:
-            # Mostrar estado
-            st.markdown(f"""
-            <div class="status-bubble-{status}">
-                <span class="dot-{status}">●</span>
-                {status_text}
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Mostrar días restantes
-            st.markdown(f"""
-                <div class="days-left-{status}">{dias_text}{int(abs(ayuda_details['days_left']))} días</div>
-            """, unsafe_allow_html=True)
-
-            # Mostrar lugar presentación
-            st.markdown(f"""
-                <div class="burbuja">{ayuda_ai['ai_lugar']}</div>
-            """, unsafe_allow_html=True)
-
-        with col_mid:
-            # Mostrar fechas
-            
-            st.write(f"**Fecha publicación**: {ayuda_details['fecha_publicacion']}")
-            st.write(f"**Fecha límite**: {ayuda_details['fecha_limite']}")
+        status_ai, ayuda_ai_df = generando_datos_ayuda(ayuda_details)
         
-            # Enlace a la ayuda
-            st.markdown(f"""
+        # ai data is available
+        if status_ai:
+            # Convert ai results from df to dictionary
+            ayuda_ai = ayuda_ai_df.to_dict('records')[0]
 
-                <a href="{ayuda_details['enlace_contenido']}" 
-                class="link-bubble" 
-                title="Ir al portal oficial" 
-                target="_blank">
-                    🔗 Ver ayuda original
-                </a>
+             # 2. Crear columnas para detalles debajo del título
+            col_left, col_mid, col_right= st.columns([0.27,0.35,0.38]) 
+
+
+            with col_left:
+                # Mostrar estado
+                st.markdown(f"""
+                <div class="status-bubble-{status}">
+                    <span class="dot-{status}">●</span>
+                    {status_text}
+                </div>
                 """, unsafe_allow_html=True)
 
-        with col_right:
-            # Mostrar materias
+                # Mostrar días restantes
+                st.markdown(f"""
+                    <div class="days-left-{status}">{dias_text}{int(abs(ayuda_details['days_left']))} días</div>
+                """, unsafe_allow_html=True)
+
+                # Mostrar lugar presentación
+                st.markdown(f"""
+                    <div class="burbuja">{ayuda_ai['ai_lugar']}</div>
+                """, unsafe_allow_html=True)
+
+            with col_mid:
+                # Mostrar fechas
+                
+                st.write(f"**Fecha publicación**: {ayuda_details['fecha_publicacion']}")
+                st.write(f"**Fecha límite**: {ayuda_details['fecha_limite']}")
+            
+                # Enlace a la ayuda
+                st.markdown(f"""
+
+                    <a href="{ayuda_details['enlace_contenido']}" 
+                    class="link-bubble" 
+                    title="Ir al portal oficial" 
+                    target="_blank">
+                        🔗 Ver ayuda original
+                    </a>
+                    """, unsafe_allow_html=True)
+
+            with col_right:
+                # Mostrar materias
+                st.markdown(f"""
+                        {''.join([f'<span class="burbuja">{materia.strip()}</span>' for materia in ayuda_details['materia'].split(',')])}
+                    """,
+                    unsafe_allow_html=True)
+
+            # Descripcion de la beca
+            section_header("✨ Descripción comprensible")
+            st.write(f"""{ayuda_ai['ai_descripcion']}""")
+
+
+            # Beneficiarios
+            section_header("👥 ¿Quién puede solicitar la ayuda?")
+            st.write(f"""{ayuda_ai['ai_beneficiarios']}""") 
+
+            # Requisitos
+            section_header("📋 Requisitos")
             st.markdown(f"""
-                    {''.join([f'<span class="burbuja">{materia.strip()}</span>' for materia in ayuda_details['materia'].split(',')])}
-                """,
-                unsafe_allow_html=True)
+            {ayuda_ai['ai_requisitos']}
+            """, unsafe_allow_html=True)
 
-        # Descripcion de la beca
-        section_header("✨ Descripción comprensible")
-        st.write(f"""{ayuda_ai['ai_descripcion']}""")
+            # Cuantía
+            section_header("💶 Cuantía")
+            st.markdown(f"""
+            {ayuda_ai['ai_cuantia']}
+            """, unsafe_allow_html=True)
+
+            # ¿Y luego qué?
+            section_header("⏩  ¿Y luego qué?")
+            st.markdown(f"""
+            {ayuda_ai['ai_despues']}
+            """, unsafe_allow_html=True)
+
+        # ai data is available and too many requests
+        else:
+            # 2. Crear columnas para detalles debajo del título
+            col_left, col_mid, col_right= st.columns([0.27,0.35,0.38]) 
 
 
-        # Beneficiarios
-        section_header("👥 ¿Quién puede solicitar la ayuda?")
-        st.write(f"""{ayuda_ai['ai_beneficiarios']}""") 
+            with col_left:
+                # Mostrar estado
+                st.markdown(f"""
+                <div class="status-bubble-{status}">
+                    <span class="dot-{status}">●</span>
+                    {status_text}
+                </div>
+                """, unsafe_allow_html=True)
 
-        # Requisitos
-        section_header("📋 Requisitos")
-        st.markdown(f"""
-        {ayuda_ai['ai_requisitos']}
-        """, unsafe_allow_html=True)
+                # Mostrar días restantes
+                st.markdown(f"""
+                    <div class="days-left-{status}">{dias_text}{int(abs(ayuda_details['days_left']))} días</div>
+                """, unsafe_allow_html=True)
 
-        # Cuantía
-        section_header("💶 Cuantía")
-        st.markdown(f"""
-        {ayuda_ai['ai_cuantia']}
-        """, unsafe_allow_html=True)
 
-        # ¿Y luego qué?
-        section_header("⏩  ¿Y luego qué?")
-        st.markdown(f"""
-        {ayuda_ai['ai_despues']}
-        """, unsafe_allow_html=True)
+            with col_mid:
+                # Mostrar fechas
+                
+                st.write(f"**Fecha publicación**: {ayuda_details['fecha_publicacion']}")
+                st.write(f"**Fecha límite**: {ayuda_details['fecha_limite']}")
+            
+                # Enlace a la ayuda
+                st.markdown(f"""
+
+                    <a href="{ayuda_details['enlace_contenido']}" 
+                    class="link-bubble" 
+                    title="Ir al portal oficial" 
+                    target="_blank">
+                        🔗 Ver ayuda original
+                    </a>
+                    """, unsafe_allow_html=True)
+
+            with col_right:
+                # Mostrar materias
+                st.markdown(f"""
+                        {''.join([f'<span class="burbuja">{materia.strip()}</span>' for materia in ayuda_details['materia'].split(',')])}
+                    """,
+                    unsafe_allow_html=True)
+
+            st.warning("""
+                        👀 Mucha gente está usando nuestra página y estamos dando prioridad a las **ayudas activas**.  
+                        ✅ Te recomendamos esperar un poco y explorar la ayuda orginal pinchando en el link.
+                        """)
+        
+        
+
+
+
+       
 
 @st.cache_data(ttl=0)
 def generando_datos_ayuda(ayuda_row):
@@ -223,27 +279,34 @@ def generando_datos_ayuda(ayuda_row):
     # print(gs_df[gs_df['ayuda_id']==ayuda_id])
 
     # Check if ayuda_id has been processed
-    if ayuda_id not in gs_df['ayuda_id'].values:
-        # st.write("✨ Generando datos... ✨")
-        ai_row = process_ayuda_with_ai(ayuda_row)
-        
+    if ayuda_id in gs_df['ayuda_id'].values:
 
-        #convert dict to pandas dataframe
-        ai_row_series = pd.Series(ai_row)
-        ai_row_df = ai_row_series.to_frame()
-        ai_row_df = ai_row_df.T
+        ai_row_df = gs_df[gs_df['ayuda_id']==ayuda_id]
 
-
-        # # Update database
-        gs_df_updated = pd.concat([gs_df,ai_row_df],ignore_index=True)
-        gs_conn.update(worksheet='db',data=gs_df_updated)
-
+        return True, ai_row_df
 
     else:
-        ai_row_df = gs_df[gs_df['ayuda_id']==ayuda_id]
+        # Try to generate ai responses
+        try:
+            ai_row = process_ayuda_with_ai(ayuda_row)
+            #convert dict to pandas dataframe
+            ai_row_series = pd.Series(ai_row)
+            ai_row_df = ai_row_series.to_frame()
+            ai_row_df = ai_row_df.T
+
+
+            # # Update database
+            gs_df_updated = pd.concat([gs_df,ai_row_df],ignore_index=True)
+            gs_conn.update(worksheet='db',data=gs_df_updated)
+
+            return True, ai_row_df
+
+        except:
+
+            return False, []
         
 
-    return ai_row_df
+    
 
 def process_ayuda_with_ai(ayuda_row):
 
