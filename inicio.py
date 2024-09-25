@@ -53,13 +53,17 @@ def show_home():
         layout="wide"
     )
 
-    # Logo
-    st.logo("./logo/ayuda_facyl_logo.png")
+
+    # Logo on the top
+    col1, col2, col3 = st.columns([2,1,2])
+    with col2:
+        st.image("./logo/ayuda_facyl_logo_small.png")
 
     # Título
-    st.title("**Ayuda Fá**cyl")
-    st.subheader("""Encuentra la Subvención o Beca que se ajuste a ti.""")
-    st.subheader("""Nosotros te ayudamos a entenderla""")
+    # st.title("**Ayuda Fá**cyl")
+    st.markdown("<h1 style='text-align: center;'><b>Ayuda Fá</b>cyl</h1>", unsafe_allow_html=True)
+
+    st.markdown("<p style='text-align: center; font-size: 18px; color: #808080;'>Encuentra la ayuda que se ajuste a ti. Nosotros te ayudamos a entenderla.</p>", unsafe_allow_html=True)
 
 
     # Estilos CSS personalizados
@@ -152,14 +156,6 @@ def show_home():
         # Iterar sobre las situaciones y crear una tarjeta para cada una
         for i, (situacion, count) in enumerate(situacion_counts.items()):
             with cols[i % 2]:
-            #     st.markdown(f"""
-            #     <div class="card">
-            #         <div class="card-title">{situacion}</div>
-            #         <div class="card-content">
-            #             <span class="green-dot">●</span> Ayudas activas: {count}
-            #         </div>
-            #     </div>
-            # """, unsafe_allow_html=True)
                 st.markdown("""
                 <style>
                 button[kind="primary"] {

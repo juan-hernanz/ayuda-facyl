@@ -91,11 +91,10 @@ st.markdown("""
 
 
 def show_details():
-
     # Check and initialise session state variables
     if 'beca_id' not in st.session_state:
         show_listado_ayudas()
-    
+
     # Add Frame for container
     container = st.container(border=True)
 
@@ -257,11 +256,6 @@ def show_details():
                         ✅ Te recomendamos esperar un poco y explorar la ayuda orginal pinchando en el link.
                         """)
         
-        
-
-
-
-       
 
 @st.cache_data(ttl=0)
 def generando_datos_ayuda(ayuda_row):
