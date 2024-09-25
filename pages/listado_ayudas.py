@@ -42,6 +42,8 @@ situacion_mapping = {
 }
 
 def show_listado_ayudas():
+
+
     st.title("Listado de Ayudas")
 
     # Estilos CSS personalizados
@@ -99,7 +101,7 @@ def show_listado_ayudas():
                     "grupo1": "Persona",
                     "grupo2": "Ciudadano",
                     "situacion": "Para estudiar y formarse"
-                }
+                } 
 
 
     
