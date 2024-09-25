@@ -7,8 +7,6 @@ from utils import limpiar_html
 from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
-import requests
-import re
 
 st.markdown("""
 <style>
