@@ -10,7 +10,7 @@ URL: https://ayuda-facyl.streamlit.app/
 Se puede instalar y ejecutar como cualquier programa python. El único requisito es construir el entorno virtual e instalar las dependencias indicadas en el archivo requirements.txt
 ```sh
 $ git clone git@github.com:juan-hernanz/ayuda-facyl.git
-$ cd AyudaFacyl/
+$ cd ayuda-facyl/
 $ python3 -m venv venv
 $ source venv/bin/activate
 $ pip install -r requirements.txt
