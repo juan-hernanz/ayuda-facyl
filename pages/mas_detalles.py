@@ -3,6 +3,12 @@ import pandas as pd
 from huggingface_hub import InferenceClient
 from utils import limpiar_html, calcular_dias_restantes, section_header
 from pages.listado_ayudas import show_listado_ayudas
+from utils import limpiar_html
+from streamlit_gsheets import GSheetsConnection
+from datetime import datetime
+
+import requests
+import re
 
 st.markdown("""
 <style>
@@ -106,10 +112,10 @@ def show_details():
         full_df = calcular_dias_restantes(full_df)
 
         # Fetch the details of the selected beca from your dataframe
-        beca_details = full_df[full_df['identificador'] == beca_id].iloc[0]
+        ayuda_details = full_df[full_df['identificador'] == beca_id].iloc[0]
 
         # Determine status
-        if beca_details['days_left']>=0:
+        if ayuda_details['days_left']>=0:
             status = 'active'
             status_text = 'Activa'
             dias_text = 'Quedan '
@@ -118,22 +124,20 @@ def show_details():
             status_text = 'Expirada'
             dias_text = 'Expiró hace '
 
-        
-        # Open the file and read the token
-        # with open('api_token.txt', 'r') as file:
-        #     api_token = file.read().strip()
-        # client = InferenceClient(token=api_token)
-        api_token = st.secrets["api_token"]
-        client = InferenceClient(token=api_token)
+        # Check if beca_id has been processed by ai
+        ayuda_ai_df = generando_datos_ayuda(ayuda_details)
+        # Convert ai results from df to dictionary
+        ayuda_ai = ayuda_ai_df.to_dict('records')[0]
 
-        # Calls to genAI
-        model = 'mistralai/Mistral-7B-Instruct-v0.3'
+        # st.write(ayuda_ai_df)
 
-        # Mostrar Título
-        st.subheader(f"{beca_details['titulo']}")
+        # 1. Mostrar Título
+        st.subheader(f"{ayuda_details['titulo']}")
 
-        # Crear columnas para detalles debajo del título
+
+        # 2. Crear columnas para detalles debajo del título
         col_left, col_mid, col_right= st.columns([0.27,0.35,0.38]) 
+
 
         with col_left:
             # Mostrar estado
@@ -146,73 +150,137 @@ def show_details():
 
             # Mostrar días restantes
             st.markdown(f"""
-                <div class="days-left-{status}">{dias_text}{int(abs(beca_details['days_left']))} días</div>
+                <div class="days-left-{status}">{dias_text}{int(abs(ayuda_details['days_left']))} días</div>
             """, unsafe_allow_html=True)
 
             # Mostrar lugar presentación
             st.markdown(f"""
-                <div class="burbuja">{decide_location(client,beca_details['lugar_presentacion'], model)}</div>
+                <div class="burbuja">{ayuda_ai['ai_lugar']}</div>
             """, unsafe_allow_html=True)
 
         with col_mid:
             # Mostrar fechas
             
-            st.write(f"**Fecha publicación**: {beca_details['fecha_publicacion']}")
-            st.write(f"**Fecha límite**: {beca_details['fecha_limite']}")
+            st.write(f"**Fecha publicación**: {ayuda_details['fecha_publicacion']}")
+            st.write(f"**Fecha límite**: {ayuda_details['fecha_limite']}")
         
             # Enlace a la ayuda
             st.markdown(f"""
 
-                <a href="{beca_details['enlace_contenido']}" 
+                <a href="{ayuda_details['enlace_contenido']}" 
                 class="link-bubble" 
                 title="Ir al portal oficial" 
                 target="_blank">
                     🔗 Ver ayuda original
                 </a>
-
-
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
         with col_right:
             # Mostrar materias
             st.markdown(f"""
-                    {''.join([f'<span class="burbuja">{materia.strip()}</span>' for materia in beca_details['materia'].split(',')])}
+                    {''.join([f'<span class="burbuja">{materia.strip()}</span>' for materia in ayuda_details['materia'].split(',')])}
                 """,
                 unsafe_allow_html=True)
 
-
-
         # Descripcion de la beca
         section_header("✨ Descripción comprensible")
-        st.write(f"""{summarise_description(client,beca_details['descripcion'], model)}""")
-        # st.write(f"""{beca_details['descripcion']}""")
+        st.write(f"""{ayuda_ai['ai_descripcion']}""")
 
 
         # Beneficiarios
         section_header("👥 ¿Quién puede solicitar la ayuda?")
-        st.write(f"""{summarise_beneficiarios(client,beca_details['beneficiarios'], model)}""") 
-        # st.write(f"""{beca_details['beneficiarios']}""")
+        st.write(f"""{ayuda_ai['ai_beneficiarios']}""") 
 
         # Requisitos
         section_header("📋 Requisitos")
-        st.markdown(f"""{summarise_requisitos(client,beca_details['requisitos'], model).replace("```html", "").replace("```", "").strip()}"""
-        , unsafe_allow_html=True)
-        # st.write(f"""{beca_details['requisitos']}""")
+        st.markdown(f"""
+        {ayuda_ai['ai_requisitos']}
+        """, unsafe_allow_html=True)
 
         # Cuantía
         section_header("💶 Cuantía")
         st.markdown(f"""
-        {summarise_cuantia(client,beca_details['cuantia'], model).replace("```html", "").replace("```", "").strip()}
+        {ayuda_ai['ai_cuantia']}
         """, unsafe_allow_html=True)
-        # st.write(f"""{beca_details['cuantia']}""")
 
         # ¿Y luego qué?
         section_header("⏩  ¿Y luego qué?")
         st.markdown(f"""
-        {summarise_after(client,beca_details['forma_resolucion'],beca_details['recursos'], model).replace("```html", "").replace("```", "").strip()}
+        {ayuda_ai['ai_despues']}
         """, unsafe_allow_html=True)
-        # st.write(f"""{beca_details['forma_resolucion']}""")
-        # st.write(f"""{beca_details['recursos']}""")
+
+@st.cache_data(ttl=0)
+def generando_datos_ayuda(ayuda_row):
+
+    ayuda_id = ayuda_row['identificador']
+    print(ayuda_id)
+
+    # Read the database
+    st.cache_data.clear()
+    gs_conn = st.connection("gsheets", type=GSheetsConnection)
+    gs_db = gs_conn.read()
+    gs_df  = pd.DataFrame(gs_db)
+    gs_df['ayuda_id'] = gs_df['ayuda_id'].astype(int)
+
+    # print(gs_df[gs_df['ayuda_id']==ayuda_id])
+
+    # Check if ayuda_id has been processed
+    if ayuda_id not in gs_df['ayuda_id'].values:
+        # st.write("✨ Generando datos... ✨")
+        ai_row = process_ayuda_with_ai(ayuda_row)
+        
+
+        #convert dict to pandas dataframe
+        ai_row_series = pd.Series(ai_row)
+        ai_row_df = ai_row_series.to_frame()
+        ai_row_df = ai_row_df.T
+
+
+        # # Update database
+        gs_df_updated = pd.concat([gs_df,ai_row_df],ignore_index=True)
+        gs_conn.update(worksheet='db',data=gs_df_updated)
+
+
+    else:
+        ai_row_df = gs_df[gs_df['ayuda_id']==ayuda_id]
+        
+
+    return ai_row_df
+
+def process_ayuda_with_ai(ayuda_row):
+
+    # Open the file and read the token
+    api_token = st.secrets["api_token"]
+    client = InferenceClient(token=api_token)
+
+    # Calls to genAI
+    model = 'mistralai/Mistral-7B-Instruct-v0.3'
+
+    ai_descripcion = summarise_description(client,ayuda_row['descripcion'], model)
+    ai_beneficiarios = summarise_beneficiarios(client,ayuda_row['beneficiarios'], model)
+    ai_requisitos = summarise_requisitos(client,ayuda_row['requisitos'], model).replace("```html", "").replace("```", "").strip()
+    ai_cuantia = summarise_cuantia(client,ayuda_row['cuantia'], model).replace("```html", "").replace("```", "").strip()
+    ai_despues = summarise_after(client,ayuda_row['forma_resolucion'],ayuda_row['recursos'], model).replace("```html", "").replace("```", "").strip()
+    ai_lugar = decide_location(client,ayuda_row['lugar_presentacion'], model)
+
+    # Timestamp
+    current_datetime = datetime.now()
+    formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Create a dictionary with your variables
+    new_row = {
+        "ayuda_id":int(ayuda_row['identificador']),
+        "ai_descripcion": ai_descripcion,
+        "ai_beneficiarios": ai_beneficiarios,
+        "ai_requisitos": ai_requisitos,
+        "ai_cuantia": ai_cuantia,
+        "ai_despues": ai_despues,
+        "ai_lugar": ai_lugar,
+        "ai_created_at": formatted_datetime
+    }
+
+
+    return new_row
 
 def summarise_description(client,text, model):
 
@@ -388,6 +456,7 @@ def decide_location(client,lugar_presentacion,model):
     )
     
     return response
+
 
 if __name__ == "__main__":
     show_details()

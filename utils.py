@@ -307,7 +307,7 @@ def mostrar_tarjetas_personalizadas(df_to_show, status):
                 if st.button("Ver más", key=button_key):
                     # Handle button click
                     st.session_state.beca_id = beca_id
-                    st.switch_page("pages/details.py")
+                    st.switch_page("pages/mas_detalles.py")
 
 def limpiar_html(texto):
     # Patrón para coincidir con cualquier tag HTML
@@ -317,7 +317,6 @@ def limpiar_html(texto):
     texto_limpio = re.sub(patron, '', texto)
     
     return texto_limpio
-
 
 def section_header(title):
     st.markdown("""

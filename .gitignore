@@ -1,5 +1,6 @@
 .DS_Store
 .streamlit/secrets.toml
+/gsheets-database
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
