@@ -53,6 +53,9 @@ def show_home():
         layout="wide"
     )
 
+    # Logo
+    st.logo("./logo/ayuda_facyl_logo.png")
+
     # Título
     st.title("**Ayuda Fá**cyl")
     st.subheader("""Encuentra la Subvención o Beca que se ajuste a ti.""")
@@ -186,9 +189,6 @@ def show_home():
 
                     }
                     st.switch_page("pages/listado_ayudas.py")
-
-
-        
 
     # Columna izquierda: Buscador
     with col_izquierda:

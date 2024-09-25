@@ -3,3 +3,4 @@ numpy==1.23.5
 streamlit==1.38.0
 huggingface-hub==0.24.6
 requests==2.29.0
+st-gsheets-connection==0.1.0
