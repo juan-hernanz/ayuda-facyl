@@ -311,12 +311,35 @@ def process_ayuda_with_ai(ayuda_row):
     # Calls to genAI
     model = 'mistralai/Mistral-7B-Instruct-v0.3'
 
-    ai_descripcion = summarise_description(client,ayuda_row['descripcion'], model)
-    ai_beneficiarios = summarise_beneficiarios(client,ayuda_row['beneficiarios'], model)
-    ai_requisitos = summarise_requisitos(client,ayuda_row['requisitos'], model).replace("```html", "").replace("```", "").strip()
-    ai_cuantia = summarise_cuantia(client,ayuda_row['cuantia'], model).replace("```html", "").replace("```", "").strip()
-    ai_despues = summarise_after(client,ayuda_row['forma_resolucion'],ayuda_row['recursos'], model).replace("```html", "").replace("```", "").strip()
-    ai_lugar = decide_location(client,ayuda_row['lugar_presentacion'], model)
+    if ayuda_row['descripcion'].notnull():
+        ai_descripcion = summarise_description(client,ayuda_row['descripcion'], model)
+    else:
+        ai_descripcion = "Lo sentimos, no disponemos de esa información. Puedes consultar el link original de la ayuda."
+
+    if ayuda_row['beneficiarios'].notnull():
+        ai_beneficiarios = summarise_beneficiarios(client,ayuda_row['beneficiarios'], model)
+    else:
+        ai_beneficiarios = "Lo sentimos, no disponemos de esa información. Puedes consultar el link original de la ayuda."
+
+    if ayuda_row['requisitos'].notnull():
+        ai_requisitos = summarise_requisitos(client,ayuda_row['requisitos'], model).replace("```html", "").replace("```", "").strip()
+    else:
+        ai_requisitos = "Lo sentimos, no disponemos de esa información. Puedes consultar el link original de la ayuda."
+
+    if ayuda_row['cuantia'].notnull():
+        ai_cuantia = summarise_cuantia(client,ayuda_row['cuantia'], model).replace("```html", "").replace("```", "").strip()
+    else:
+        ai_cuantia = "Lo sentimos, no disponemos de esa información. Puedes consultar el link original de la ayuda."
+
+    if ayuda_row['forma_resolucion'].notnull():
+        ai_despues = summarise_after(client,ayuda_row['forma_resolucion'],ayuda_row['recursos'], model).replace("```html", "").replace("```", "").strip()
+    else:
+        ai_despues = "Lo sentimos, no disponemos de esa información. Puedes consultar el link original de la ayuda."
+
+    if ayuda_row['lugar_presentacion'].notnull():
+        ai_lugar = decide_location(client,ayuda_row['lugar_presentacion'], model)
+    else:
+        ai_lugar = "Lo sentimos, no disponemos de esa información. Puedes consultar el link original de la ayuda."
 
     # Timestamp
     current_datetime = datetime.now()
